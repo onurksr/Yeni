@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f0b1e">
+<title>Parti Odası</title>
+<style>
+:root{
+  --bg:#0f0b1e;--card:#1b1535;--card2:#231b46;--tx:#f5f3ff;--mu:#a49bc9;
+  --p:#8b5cf6;--b:#3b82f6;--o:#f59e0b;--g:#22c55e;--r:#ef4444;--line:#3a2f6b
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(900px 500px at 50% -10%,#2f1d6b,var(--bg))}
+body{
+  margin:0;
+  color:var(--tx);
+  font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  min-height:100vh;min-height:100dvh;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)
+}
+#app{max-width:540px;margin:0 auto;padding:14px 0 48px}
+h1{font-size:32px;line-height:1.12;margin:16px 0 8px;font-weight:900}
+h2{margin:0 0 10px;font-size:19px}
+h3{margin:10px 0 6px;font-size:16px}
+.card{background:var(--card);border:1px solid rgba(139,92,246,.22);border-radius:20px;padding:15px;margin:11px 0}
+.mu{color:var(--mu);font-size:14px}
+.msg{background:#7c2d12;border-color:#ea580c}
+.toast{background:#1e3a8a;border-color:#60a5fa}
+button,input,select,textarea{
+  font:inherit;color:inherit;width:100%;min-height:50px;
+  border-radius:14px;border:2px solid var(--line);background:#120d28;
+  padding:10px 14px;margin:5px 0
+}
+button{background:var(--p);border:0;font-weight:800;cursor:pointer;transition:transform .1s,opacity .15s}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.o{background:var(--o);color:#1a1033}
+button.g{background:var(--g);color:#052e16}
+button.b{background:var(--b);color:#fff}
+button.r{background:var(--r);color:#fff}
+button.x{background:#2a2250}
+button.sm{min-height:38px;padding:6px 10px;font-size:13px;border-radius:11px;margin:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:110px}
+.pl{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.pl:last-child{border-bottom:0}.pl b{flex:1}.av{font-size:26px}
+.kick{width:42px;min-height:36px;margin:0;padding:0;flex:none}
+.big{font-size:48px;font-weight:900;text-align:center;letter-spacing:2px}
+.pop{animation:pop .45s}@keyframes pop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+.bar{height:10px;border-radius:10px;background:var(--o);transition:width .2s linear}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.gc{
+  background:var(--card2);border:2px solid var(--line);border-radius:18px;
+  padding:12px;font-size:13px;line-height:1.3;display:flex;flex-direction:column;justify-content:space-between
+}
+.gc.sel{border-color:var(--o);box-shadow:0 0 0 3px rgba(245,158,11,.28)}
+.gc.disabled{opacity:.48;border-style:dashed}
+.gc b{display:block;font-size:15px;margin:4px 0}
+.ge{font-size:28px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;
+  background:#120d28;border:1.5px solid var(--line);font-size:13px;cursor:pointer;
+  min-height:auto;width:auto;margin:0;font-weight:700
+}
+.chip.on{background:rgba(245,158,11,.2);border-color:var(--o);color:#fde68a}
+.cn-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+.cn-card{
+  min-height:66px;border-radius:12px;padding:6px 4px;font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;text-align:center;word-break:break-word;
+  border:2px solid #4c3f85;background:#1e163d;margin:0
+}
+.cn-card.t-red{background:#7f1d1d;border-color:#ef4444}
+.cn-card.t-blue{background:#1e3a8a;border-color:#3b82f6}
+.cn-card.t-neutral{background:#44403c;border-color:#a8a29e}
+.cn-card.t-assassin{background:#09090b;border-color:#f43f5e;color:#fda4af}
+.cn-card.rev{opacity:.58;transform:scale(.96)}
+.scene-box{
+  border-radius:16px;padding:14px;margin:8px 0;
+  background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid rgba(255,255,255,.16)
+}
+.dist{position:relative;display:flex;gap:8px;background:#120d28;border-radius:14px;margin:6px 0;padding:11px 13px;overflow:hidden}
+.dist i{position:absolute;inset:0 auto 0 0;background:#3b2a7a}
+.dist.ok i{background:#15803d}
+.dist span,.dist b{position:relative}.dist span{flex:1}
+.howto{background:#120d28;border-radius:12px;padding:9px;margin-top:8px;font-size:12px;color:var(--mu)}
+@media(prefers-reduced-motion:reduce){.pop{animation:none}}
+#app.nopop .pop{animation:none}
+.frame{width:100%;aspect-ratio:16/9;object-fit:contain;background:#000;border-radius:16px;display:block;margin:8px 0}
+.thumbs{display:flex;gap:6px;margin:6px 0}.thumbs img{width:20%;aspect-ratio:16/9;object-fit:cover;border-radius:8px}
+.eq{display:flex;gap:5px;justify-content:center;align-items:flex-end;height:44px;margin:6px 0}
+.eq i{width:9px;height:10px;background:var(--o);border-radius:5px}
+.eq.on i{animation:eqb .8s infinite ease-in-out}.eq.on i:nth-child(2){animation-delay:.15s}.eq.on i:nth-child(3){animation-delay:.3s}.eq.on i:nth-child(4){animation-delay:.45s}.eq.on i:nth-child(5){animation-delay:.6s}
+@keyframes eqb{50%{height:44px}}
+input[type=range]{padding:0;min-height:38px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const sock = io({ reconnectionDelayMax: 3000 });
+
+let S = null, at = 0, msg = '', toast = '', openHow = {};
+let catalog = {
+  musicCategories: ['Türkçe Pop', 'Yabancı Pop', 'Türkçe Rap', 'Yabancı Rap', 'Rock', 'Alternatif', 'Arabesk', 'Türkçe Slow', 'Yabancı Slow', '2000\'ler', '2010\'lar', '2020 ve sonrası', 'Film müzikleri', 'Dizi müzikleri', 'Oyun müzikleri', 'Karışık'],
+  artistsTr: ['Tarkan', 'Sezen Aksu', 'Duman', 'Manga', 'Barış Manço', 'Teoman', 'Simge', 'Ezhel', 'Ceza', 'Sagopa Kajmer'],
+  artistsEn: ['The Weeknd', 'Ed Sheeran', 'Billie Eilish', 'Queen', 'Linkin Park', 'Eminem', 'Adele', 'Coldplay'],
+  filmCategories: ['Hollywood', 'Türk Sineması', 'Marvel', 'DC', 'Animasyon', 'Disney', 'Pixar', 'Harry Potter', 'Bilim Kurgu', 'Aksiyon', 'Komedi', 'Korku', 'Gerilim', 'Fantastik', 'Dram', 'Romantik', 'Macera', 'Suç ve Polisiye', 'Eski Klasikler', 'Yeni Filmler', 'Tüm Zamanların Popüler Filmleri'],
+  filmSeries: ['Marvel Sinematik Evreni', 'DC Evreni', 'Harry Potter', 'Yüzüklerin Efendisi', 'Hızlı ve Öfkeli', 'Karayip Korsanları', 'Transformers', 'Jurassic Park', 'Mission Impossible', 'Star Wars', 'John Wick', 'Spider-Man', 'Batman'],
+};
+
+let cfg = {
+  game: 'tf',
+  difficulty: 'medium',
+  mode: 'solo',
+  rounds: 5,
+  time: 20,
+  teams: 2,
+  imposterCount: 1,
+  imposterGuessBonus: true,
+  mixMode: false,
+  mixGames: ['emoji', 'song', 'film'],
+  mixRoundsPerGame: 2,
+  artistSearch: '',
+  seriesSearch: '',
+  showAdmin: false,
+  musicFilter: { categories: [], artists: [], lang: 'all', minYear: '', maxYear: '', onlyPopular: false, randomMix: false },
+  filmFilter: { categories: [], series: [], region: 'all', minYear: '', maxYear: '', popLevel: 'all', randomMix: false },
+};
+
+const MIX_FORBIDDEN = new Set(['codenames', 'werewolf', 'imposter']);
+const DIFF_TR = { easy: 'Kolay', medium: 'Orta', hard: 'Zor' };
+
+const GAMES = [
+  ['tf', '✅', 'Doğru mu Yanlış mı?', 'Şaşırtıcı bilgiler, hızlı karar', '2–10 kişi · ~5 dk', 'Ekrandaki bilginin doğru mu yanlış mı olduğunu seç; hız bonusunu kap.'],
+  ['closest', '🎯', 'En Yakın Cevabı Bul', 'Sayıya en çok yaklaşan kazanır', '2–10 kişi · ~5 dk', 'Gerçek sayısal değere en yakın tahmini gir; bireysel veya takım oynanır.'],
+  ['quiz', '🧠', 'Hızlı Quiz', '4 şık, hız bonuslu yarış', '2–10 kişi · ~5 dk', '4 seçenekten doğru olanı seç; erken ve doğru cevap daha çok puan verir.'],
+  ['liar', '🕵️', 'Hangisi Yalan?', 'Bilgilerden yalanı yakala', '2–10 kişi · ~5 dk', 'Verilen ifadeler arasındaki yanlış/yalan bilgiyi bul.'],
+  ['wyr', '🤔', 'Kimi Seçerdin?', 'İki seçenek, çoğunluk puan alır', '2–10 kişi · ~5 dk', 'İki seçenekten birini seç; çoğunluğun tercihinde yer alan puan kazanır.'],
+  ['ml', '👀', 'Kim Daha Olası?', 'Arkadaşlarından birini seç', '2–10 kişi · ~5 dk', 'Sorudaki duruma en uyan arkadaşını oyla.'],
+  ['emoji', '🎬', 'Emojiden Tahmin Et', 'Emojiler hangi film, dizi veya oyun?', '2–10 kişi · ~5 dk', 'İpucu emojilere bakarak adı yaz ve ilk bilenlerden biri ol.'],
+  ['codenames', '🗂️', 'Codenames', '5x5 gizli kelime tahtası (2 Takım)', '4–10 kişi · ~8 dk', 'Takım lideri ipucu+sayı verir; ekip kartları seçer. Siyah kart oyunu bitirir!'],
+  ['werewolf', '🐺', 'Vampir Köylü', 'Gece-gündüz gizli rol ve oylama', '5–10 kişi · ~10 dk', 'Vampir, Doktor, Dedektif ve Köylü rolleriyle gece aksiyonu ve gündüz oylaması yapılır.'],
+  ['imposter', '🎭', 'Imposter – Gizli Kelime', 'Farklı kelimeyi alan kişiyi bul', '4–10 kişi · ~7 dk', 'Herkes gizli kelimesini görür, sırayla ipucu verir ve oylama ile Imposter’ı arar.'],
+  ['song', '🎵', 'Şarkıyı İlk Sen Bil!', 'Kısa dinletiden şarkıyı hemen bil', '2–10 kişi · ~6 dk', 'Çalan parçayı dinle, şarkı adını yaz ve sıralamada öne geç.'],
+  ['film', '🎞️', 'Filmden Kareyi Bil!', 'Sahneler açıldıkça filmi tahmin et', '2–10 kişi · ~6 dk', 'Farklı sahneler sırayla açılır; erken karede bilen en yüksek puanı alır.'],
+];
+
+const GN = Object.fromEntries(GAMES.map(g => [g[0], g[2]]));
+const GE = Object.fromEntries(GAMES.map(g => [g[0], g[1]]));
+const K = { closest: 'num', emoji: 'txt', song: 'txt', film: 'txt' };
+
+const urlCode = new URLSearchParams(location.search).get('oda') || '';
+const save = o => { try { localStorage.setItem('ses', JSON.stringify(o)); } catch (e) {} };
+
+fetch('/catalog').then(r => r.ok ? r.json() : null).then(d => {
+  if (d) { catalog = { ...catalog, ...d }; draw(); }
+}).catch(() => {});
+
+sock.on('connect', () => {
+  let x = null;
+  try { x = JSON.parse(localStorage.getItem('ses')); } catch (e) {}
+  if (x && x.code && x.key) {
+    sock.emit('rejoin', x.code, x.key, r => {
+      if (r && r.err) { localStorage.removeItem('ses'); S = null; draw(); }
+    });
+  }
+});
+let skew = 0;
+sock.on('s', s => { S = s; at = Date.now(); msg = ''; if (s.q && s.q.serverNow) skew = s.q.serverNow - Date.now(); draw(); });
+sock.on('toast', t => { toast = t; draw(); setTimeout(() => { if (toast === t) { toast = ''; draw(); } }, 3000); });
+sock.on('kicked', () => { localStorage.removeItem('ses'); S = null; msg = 'Oda sahibi seni odadan çıkardı.'; draw(); });
+sock.on('disconnect', () => { msg = 'Bağlantı koptu. Yeniden bağlanılıyor…'; draw(); });
+
+const SIL = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+const au = new Audio();
+au.preload = 'auto';
+let audMsg = '', vol = 0.8, auKey = '', auTimers = [], unlocked = false;
+try { vol = parseFloat(localStorage.getItem('vol')) || 0.8; } catch (e) {}
+au.volume = vol;
+document.addEventListener('pointerdown', () => {
+  if (unlocked) return;
+  unlocked = true;
+  if (!au.src) { au.src = SIL; au.play().then(() => au.pause()).catch(() => { unlocked = false; }); }
+});
+const setAud = m => { audMsg = m; const e = $('aust'); if (e) e.textContent = m; };
+const eq = on => { const e = $('eqb'); if (e) e.classList.toggle('on', on); };
+const setVol = v => { vol = +v; au.volume = vol; try { localStorage.setItem('vol', vol); } catch (e) {} };
+function stopAud() { auTimers.forEach(clearTimeout); auTimers = []; try { au.pause(); } catch (e) {} eq(false); }
+function startClip(q, sync) {
+  stopAud();
+  setAud('⏳ Yükleniyor…');
+  au.onerror = () => setAud('⚠️ Müzik yüklenemedi. “Başlat” ile tekrar dene.');
+  au.src = q.audio;
+  au.load();
+  const late = sync ? Math.max(0, Date.now() + skew - q.playAt) : 0;
+  if (late > q.clipSec * 1000) { setAud('Parça bitti. 🔁 ile tekrar dinleyebilirsin.'); return; }
+  const start = () => {
+    try { au.currentTime = q.seek + late / 1000; } catch (e) {}
+    au.volume = vol;
+    au.play().then(() => {
+      setAud('🎶 Çalıyor…'); eq(true);
+      auTimers.push(setTimeout(() => { au.pause(); eq(false); setAud('Parça bitti. 🔁 ile tekrar dinleyebilirsin.'); }, q.clipSec * 1000 - late));
+    }).catch(() => setAud('👆 Sesi başlatmak için “Başlat”a dokun.'));
+  };
+  const go = () => { if (au.readyState >= 1) start(); else au.addEventListener('loadedmetadata', start, { once: true }); };
+  const wait = sync ? q.playAt - (Date.now() + skew) : 0;
+  auTimers.push(setTimeout(go, Math.max(0, wait)));
+}
+function songSync() {
+  const q = S && S.game === 'song' && S.phase === 'question' && S.q && S.q.audio ? S.q : null;
+  if (!q) { if (auKey) { stopAud(); auKey = ''; } return; }
+  const key = q.audio + '|' + q.playAt;
+  if (key === auKey) return;
+  auKey = key;
+  startClip(q, true);
+}
+const playNow = () => { if (S && S.q && S.q.audio) { auKey = S.q.audio + '|' + S.q.playAt; startClip(S.q, false); } };
+const songUI = q => q.loading ? '<div class="mu">⏳ Şarkı hazırlanıyor…</div>' : `<div class="scene-box" style="text-align:center">
+  <div class="eq ${au.paused ? '' : 'on'}" id="eqb"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="mu" id="aust">${esc(audMsg || 'Hazırlanıyor…')}</div>
+  <div class="row"><button type="button" class="sm b" onclick="playNow()">🔊 Başlat / 🔁 Tekrar</button>
+  <input id="vol" type="range" min="0" max="1" step="0.05" value="${vol}" oninput="setVol(this.value)"></div>
+  <div class="mu">Müzik önizlemeleri: Apple/iTunes · Deezer</div></div>`;
+const filmUI = q => {
+  if (q.loading) return '<div class="mu">⏳ Sahne hazırlanıyor…</div>';
+  const sc = q.unlockedScenes || [];
+  const cur = sc[sc.length - 1];
+  if (!cur) return '';
+  return `<div class="mu">Kare ${q.sceneIndex + 1}/${q.totalScenes} · <span id="nf"></span></div>
+  <img class="frame" src="${esc(cur.img)}" alt="Film karesi" referrerpolicy="no-referrer" onerror="this.alt='⚠️ Görsel yüklenemedi, sıradaki kare gelecek';this.style.minHeight='120px'">
+  ${sc.length > 1 ? `<div class="thumbs">${sc.slice(0, -1).map(x => `<img src="${esc(x.img)}" alt="">`).join('')}</div>` : ''}
+  <div class="mu">Görseller: TMDB</div>`;
+};
+let audioCtx = null;
+function playClip(notes, sec) {
+  if (!Array.isArray(notes) || !notes.length) return;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!audioCtx) audioCtx = new Ctx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const step = Math.min(0.45, (sec || 6) / notes.length);
+    notes.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + i * step);
+      gain.gain.setValueAtTime(0.08, now + i * step);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + (i + 1) * step - 0.02);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + i * step);
+      osc.stop(now + (i + 1) * step);
+    });
+  } catch (e) {}
+}
+
+const getName = () => {
+  const el = $('nm');
+  const v = el ? el.value.trim() : '';
+  if (!v) { msg = 'Önce kullanıcı adını yaz.'; draw(); return ''; }
+  try { localStorage.setItem('nm', v); } catch (e) {}
+  return v;
+};
+const mk = () => { const n = getName(); if (n) sock.emit('create', n, r => save(r)); };
+const jn = () => {
+  const n = getName();
+  const cd = $('cd') ? $('cd').value.trim().toUpperCase() : '';
+  if (n) sock.emit('join', cd, n, r => { if (r && r.err) { msg = r.err; draw(); } else save(r); });
+};
+const parseNum = t => {
+  t = t.replace(/\s/g, '');
+  if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
+  return Number(t);
+};
+const sendAns = () => {
+  const el = $('ans');
+  if (!el || !S) return;
+  const t = el.value.trim();
+  if (!t) return;
+  if (K[S.game] === 'txt') {
+    sock.emit('answer', t);
+    el.value = '';
+    return;
+  }
+  const v = parseNum(t);
+  if (Number.isFinite(v)) { sock.emit('answer', v); el.value = ''; }
+};
+const leaveRoom = () => { sock.emit('leave'); try { localStorage.removeItem('ses'); } catch (e) {} S = null; draw(); };
+const copyLink = b => {
+  const l = location.origin + '/?oda=' + S.code;
+  (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject())
+    .then(() => { b.textContent = 'Kopyalandı ✓'; }, () => prompt('Bağlantı:', l));
+};
+const setCfg = (k, el) => { cfg[k] = isNaN(el.value) ? el.value : +el.value; draw(); };
+const toggleHow = (id, ev) => { if (ev) ev.stopPropagation(); openHow[id] = !openHow[id]; draw(); };
+
+function toggleChip(el, f, k, max) { toggleArrItem(cfg[f][k], el.dataset.v, max); }
+function toggleArrItem(arr, val, maxLen = 12) {
+  const i = arr.indexOf(val);
+  if (i >= 0) arr.splice(i, 1);
+  else if (arr.length < maxLen) arr.push(val);
+  draw();
+}
+
+function toggleMixGame(gid) {
+  if (MIX_FORBIDDEN.has(gid)) {
+    toast = 'Codenames, Vampir Köylü ve Imposter Karma Mod ile uyumlu değildir.';
+    draw();
+    return;
+  }
+  const idx = cfg.mixGames.indexOf(gid);
+  if (idx >= 0) {
+    if (cfg.mixGames.length > 2) cfg.mixGames.splice(idx, 1);
+    else toast = 'Karma Mod için en az 2 uyumlu oyun seçili olmalı.';
+  } else {
+    if (cfg.mixGames.length < 4) cfg.mixGames.push(gid);
+    else toast = 'Karma Mod en fazla 4 oyun destekler.';
+  }
+  draw();
+}
+
+function moveMixGame(idx, dir) {
+  const target = idx + dir;
+  if (target < 0 || target >= cfg.mixGames.length) return;
+  const tmp = cfg.mixGames[idx];
+  cfg.mixGames[idx] = cfg.mixGames[target];
+  cfg.mixGames[target] = tmp;
+  draw();
+}
+
+function addCatalogItem(kind) {
+  if (kind === 'artist') {
+    const name = ($('admArtName') && $('admArtName').value) || '';
+    const region = ($('admArtReg') && $('admArtReg').value) || 'tr';
+    sock.emit('catalog:add', { kind: 'artist', name, region }, res => {
+      if (res && res.ok) {
+        if (region === 'en' && !catalog.artistsEn.includes(name.trim())) catalog.artistsEn.push(name.trim());
+        if (region === 'tr' && !catalog.artistsTr.includes(name.trim())) catalog.artistsTr.push(name.trim());
+        toast = 'Sanatçı eklendi ✓';
+      } else toast = (res && res.err) || 'Eklenemedi';
+      draw();
+    });
+  } else if (kind === 'series') {
+    const name = ($('admSerName') && $('admSerName').value) || '';
+    sock.emit('catalog:add', { kind: 'series', name }, res => {
+      if (res && res.ok) {
+        if (!catalog.filmSeries.includes(name.trim())) catalog.filmSeries.push(name.trim());
+        toast = 'Film serisi eklendi ✓';
+      } else toast = (res && res.err) || 'Eklenemedi';
+      draw();
+    });
+  } else if (kind === 'song') {
+    const title = ($('admSongTitle') && $('admSongTitle').value) || '';
+    const artist = ($('admSongArtist') && $('admSongArtist').value) || '';
+    const genre = ($('admSongGenre') && $('admSongGenre').value) || 'Karışık';
+    const year = ($('admSongYear') && $('admSongYear').value) || 2022;
+    const difficulty = ($('admSongDiff') && $('admSongDiff').value) || 'medium';
+    sock.emit('catalog:add', { kind: 'song', title, artist, genre, year, difficulty, lang: 'tr' }, res => {
+      toast = (res && res.ok) ? 'Yeni şarkı kaydı eklendi ✓' : ((res && res.err) || 'Eklenemedi');
+      draw();
+    });
+  } else if (kind === 'film') {
+    const title = ($('admFilmTitle') && $('admFilmTitle').value) || '';
+    const category = ($('admFilmCat') && $('admFilmCat').value) || 'Hollywood';
+    const series = ($('admFilmSer') && $('admFilmSer').value) || '';
+    const year = ($('admFilmYear') && $('admFilmYear').value) || 2022;
+    const difficulty = ($('admFilmDiff') && $('admFilmDiff').value) || 'medium';
+    const images = ($('admFilmImgs') && $('admFilmImgs').value) || '';
+    sock.emit('catalog:add', { kind: 'film', title, category, series, year, difficulty, images }, res => {
+      toast = (res && res.ok) ? 'Yeni film sahnesi eklendi ✓' : ((res && res.err) || 'Eklenemedi');
+      draw();
+    });
+  }
+}
+
+function gameCardsHTML(pick) {
+  return `<div class="grid">${GAMES.map(([id, em, title, desc, meta, how]) => {
+    const isSel = pick && !cfg.mixMode && cfg.game === id;
+    const isMixForb = pick && cfg.mixMode && MIX_FORBIDDEN.has(id);
+    const isMixSel = pick && cfg.mixMode && cfg.mixGames.includes(id);
+    return `<div class="gc ${isSel || isMixSel ? 'sel' : ''} ${isMixForb ? 'disabled' : ''}" ${pick ? `onclick="${cfg.mixMode ? `toggleMixGame('${id}')` : `cfg.game='${id}';draw()`}"` : ''}>
+      <div>
+        <div class="ge">${em}</div>
+        <b>${esc(title)}</b>
+        <div>${esc(desc)}</div>
+        <div class="mu">${esc(meta)} · ${esc(DIFF_TR[cfg.difficulty] || 'Orta')}</div>
+        ${isMixForb ? `<div class="mu" style="color:#fca5a5">Karma Mod’da seçilemez</div>` : ''}
+      </div>
+      <div style="margin-top:8px">
+        <button type="button" class="sm x" onclick="toggleHow('${id}',event)">${openHow[id] ? 'Kapat' : 'Nasıl oynanır'}</button>
+        ${openHow[id] ? `<div class="howto">${esc(how)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function mediaFiltersHTML() {
+  const showSong = cfg.game === 'song' || (cfg.mixMode && cfg.mixGames.includes('song'));
+  const showFilm = cfg.game === 'film' || (cfg.mixMode && cfg.mixGames.includes('film'));
+  if (!showSong && !showFilm) return '';
+
+  let out = '';
+  if (showSong) {
+    const mf = cfg.musicFilter;
+    const allArt = [...(catalog.artistsTr || []), ...(catalog.artistsEn || [])]
+      .filter(a => !cfg.artistSearch.trim() || a.toLowerCase().includes(cfg.artistSearch.trim().toLowerCase()));
+    out += `<div class="card">
+      <h2>🎵 Şarkıyı İlk Sen Bil! – Filtreler</h2>
+      <div class="row">
+        <button type="button" class="sm x" onclick="cfg.musicFilter.categories=[...catalog.musicCategories];draw()">Tümünü Seç</button>
+        <button type="button" class="sm x" onclick="cfg.musicFilter.categories=[];cfg.musicFilter.artists=[];draw()">Seçimi Temizle</button>
+      </div>
+      <div class="mu">Kategoriler / Dönemler (${mf.categories.length} seçili)</div>
+      <div class="chips">${(catalog.musicCategories || []).map(c => `<button type="button" class="chip ${mf.categories.includes(c) ? 'on' : ''}" data-v="${esc(c)}" onclick="toggleChip(this,'musicFilter','categories',12)">${esc(c)}</button>`).join('')}</div>
+      <input id="artSearch" placeholder="Sanatçı ara..." value="${esc(cfg.artistSearch)}" oninput="cfg.artistSearch=this.value;draw()">
+      <div class="chips">${allArt.slice(0, 24).map(a => `<button type="button" class="chip ${mf.artists.includes(a) ? 'on' : ''}" data-v="${esc(a)}" onclick="toggleChip(this,'musicFilter','artists',20)">${esc(a)}</button>`).join('')}</div>
+      <div class="row">
+        <select onchange="cfg.musicFilter.lang=this.value;draw()">
+          <option value="all" ${mf.lang === 'all' ? 'selected' : ''}>Tüm Diller</option>
+          <option value="tr" ${mf.lang === 'tr' ? 'selected' : ''}>Yalnızca Türkçe</option>
+          <option value="en" ${mf.lang === 'en' ? 'selected' : ''}>Yalnızca Yabancı</option>
+        </select>
+        <input type="number" placeholder="Min Yıl" value="${esc(mf.minYear)}" onchange="cfg.musicFilter.minYear=this.value;draw()">
+        <input type="number" placeholder="Max Yıl" value="${esc(mf.maxYear)}" onchange="cfg.musicFilter.maxYear=this.value;draw()">
+      </div>
+      <div class="chips">
+        <button type="button" class="chip ${mf.onlyPopular ? 'on' : ''}" onclick="cfg.musicFilter.onlyPopular=!cfg.musicFilter.onlyPopular;draw()">⭐ Sadece Popüler</button>
+        <button type="button" class="chip ${mf.randomMix ? 'on' : ''}" onclick="cfg.musicFilter.randomMix=!cfg.musicFilter.randomMix;draw()">🎲 Rastgele Karışık</button>
+      </div>
+      <div class="mu">Katalogda ${catalog.musicCount || 20} kayıt hazır · Seçilen filtreler sunucuda ortak uygulanır.</div>
+    </div>`;
+  }
+
+  if (showFilm) {
+    const ff = cfg.filmFilter;
+    const filteredSer = (catalog.filmSeries || [])
+      .filter(s => !cfg.seriesSearch.trim() || s.toLowerCase().includes(cfg.seriesSearch.trim().toLowerCase()));
+    out += `<div class="card">
+      <h2>🎞️ Filmden Kareyi Bil! – Filtreler</h2>
+      <div class="row">
+        <button type="button" class="sm x" onclick="cfg.filmFilter.categories=[...catalog.filmCategories];draw()">Tümünü Seç</button>
+        <button type="button" class="sm x" onclick="cfg.filmFilter.categories=[];cfg.filmFilter.series=[];draw()">Seçimi Temizle</button>
+      </div>
+      <div class="mu">Kategoriler (${ff.categories.length} seçili)</div>
+      <div class="chips">${(catalog.filmCategories || []).map(c => `<button type="button" class="chip ${ff.categories.includes(c) ? 'on' : ''}" data-v="${esc(c)}" onclick="toggleChip(this,'filmFilter','categories',15)">${esc(c)}</button>`).join('')}</div>
+      <input id="serSearch" placeholder="Film serisi / evreni ara..." value="${esc(cfg.seriesSearch)}" oninput="cfg.seriesSearch=this.value;draw()">
+      <div class="chips">${filteredSer.map(s => `<button type="button" class="chip ${ff.series.includes(s) ? 'on' : ''}" data-v="${esc(s)}" onclick="toggleChip(this,'filmFilter','series',15)">${esc(s)}</button>`).join('')}</div>
+      <div class="row">
+        <select onchange="cfg.filmFilter.region=this.value;draw()">
+          <option value="all" ${ff.region === 'all' ? 'selected' : ''}>Tümü</option>
+          <option value="tr" ${ff.region === 'tr' ? 'selected' : ''}>Yalnızca Türk Filmleri</option>
+          <option value="hollywood" ${ff.region === 'hollywood' ? 'selected' : ''}>Yalnızca Hollywood</option>
+        </select>
+        <select onchange="cfg.filmFilter.popLevel=this.value;draw()">
+          <option value="all" ${ff.popLevel === 'all' ? 'selected' : ''}>Tüm Popülerlik</option>
+          <option value="high" ${ff.popLevel === 'high' ? 'selected' : ''}>Popüler Filmler</option>
+          <option value="medium" ${ff.popLevel === 'medium' ? 'selected' : ''}>Seçki Filmler</option>
+        </select>
+      </div>
+      <div class="row">
+        <input type="number" placeholder="Min Yıl" value="${esc(ff.minYear)}" onchange="cfg.filmFilter.minYear=this.value;draw()">
+        <input type="number" placeholder="Max Yıl" value="${esc(ff.maxYear)}" onchange="cfg.filmFilter.maxYear=this.value;draw()">
+      </div>
+      <div class="chips">
+        <button type="button" class="chip ${ff.randomMix ? 'on' : ''}" onclick="cfg.filmFilter.randomMix=!cfg.filmFilter.randomMix;draw()">🎲 Rastgele Karışık</button>
+      </div>
+      ${catalog.tmdb === false ? '<div class="mu" style="color:#fca5a5">⚠️ Sunucuda TMDB_API_KEY yok: film oyunu başlatılamaz.</div>' : ''}
+      <div class="mu">Katalogda ${catalog.filmCount || 8} film kayıtlı · Eksik filtre durumunda yedek havuz devreye girer.</div>
+    </div>`;
+  }
+
+  out += `<div class="card">
+    <button type="button" class="sm x" onclick="cfg.showAdmin=!cfg.showAdmin;draw()">${cfg.showAdmin ? 'Katalog Ekleme Panelini Gizle' : '➕ Yeni Sanatçı / Seri / İçerik Ekle'}</button>
+    ${cfg.showAdmin ? `
+      <h3>Yeni Sanatçı Ekle</h3>
+      <div class="row">
+        <input id="admArtName" placeholder="Sanatçı adı">
+        <select id="admArtReg"><option value="tr">Türk</option><option value="en">Yabancı</option></select>
+      </div>
+      <button type="button" class="sm b" onclick="addCatalogItem('artist')">Sanatçıyı Kaydet</button>
+
+      <h3>Yeni Film Serisi Ekle</h3>
+      <input id="admSerName" placeholder="Film serisi adı">
+      <button type="button" class="sm b" onclick="addCatalogItem('series')">Seriyi Kaydet</button>
+
+      <h3>Yeni Şarkı Kaydı Ekle</h3>
+      <div class="row"><input id="admSongTitle" placeholder="Şarkı adı"><input id="admSongArtist" placeholder="Sanatçı"></div>
+      <div class="row"><input id="admSongGenre" placeholder="Tür (örn. Türkçe Pop)"><input id="admSongYear" type="number" placeholder="Yıl" value="2023"></div>
+      <button type="button" class="sm g" onclick="addCatalogItem('song')">Şarkı Kaydı Ekle</button>
+
+      <h3>Yeni Film Sahnesi Ekle</h3>
+      <div class="row"><input id="admFilmTitle" placeholder="Film adı"><input id="admFilmCat" placeholder="Kategori (örn. Bilim Kurgu)"></div>
+      <div class="row"><input id="admFilmSer" placeholder="Seri (opsiyonel)"><input id="admFilmYear" type="number" placeholder="Yıl" value="2023"></div>
+      <input id="admFilmImgs" placeholder="Sahne görseli https URL'leri (boşlukla ayır, en az 3; opsiyonel)">
+      <button type="button" class="sm g" onclick="addCatalogItem('film')">Film Sahnesi Ekle</button>
+    ` : ''}
+  </div>`;
+
+  return out;
+}
+
+function home() {
+  return `<h1>Arkadaşlarını Topla, Oyunu Başlat!</h1>
+  <p class="mu">12 standart oyun ve Karma Mod ile tek odada eğlenceye başla.</p>
+  <div class="card">
+    <input id="nm" maxlength="12" placeholder="Kullanıcı adın" value="${esc((() => { try { return localStorage.getItem('nm') || ''; } catch (e) { return ''; } })())}">
+    <button class="o" onclick="mk()">ODA OLUŞTUR</button>
+  </div>
+  <div class="card">
+    <input id="cd" maxlength="5" placeholder="ODA KODU" value="${esc(urlCode)}" style="text-transform:uppercase;text-align:center;letter-spacing:6px">
+    <button onclick="jn()">ODAYA KATIL</button>
+  </div>
+  <h2>Oyun modları (12 Oyun)</h2>
+  ${gameCardsHTML(false)}`;
+}
+
+function setup() {
+  const sel = (k, o) => `<select onchange="setCfg('${k}',this)">${o.map(([v, t]) => `<option value="${v}" ${cfg[k] == v ? 'selected' : ''}>${t}</option>`).join('')}</select>`;
+  return `
+  <div class="card" style="border-color:var(--o)">
+    <h2>🔀 Karma Mod (2–4 Uyumlu Oyun)</h2>
+    <p class="mu">Birden fazla uyumlu oyunu seçip tek oturumda sırayla oyna. Codenames, Vampir Köylü ve Imposter seçilemez.</p>
+    <div class="row">
+      <button type="button" class="${!cfg.mixMode ? 'o' : 'x'}" onclick="cfg.mixMode=false;draw()">Tek Oyun Modu</button>
+      <button type="button" class="${cfg.mixMode ? 'o' : 'x'}" onclick="cfg.mixMode=true;draw()">Karma Mod (${cfg.mixGames.length} Oyun)</button>
+    </div>
+    ${cfg.mixMode ? `
+      <div class="mu">Seçili Oyun Sırası (${cfg.mixGames.length} oyun):</div>
+      ${cfg.mixGames.map((gid, i) => `<div class="pl">
+        <span>${i + 1}. ${GE[gid] || '🎮'}</span>
+        <b>${esc(GN[gid] || gid)}</b>
+        <button type="button" class="sm x" style="width:auto" onclick="moveMixGame(${i},-1)">↑</button>
+        <button type="button" class="sm x" style="width:auto" onclick="moveMixGame(${i},1)">↓</button>
+      </div>`).join('')}
+      ${sel('mixRoundsPerGame', [[1, 'Her oyundan 1 tur'], [2, 'Her oyundan 2 tur'], [3, 'Her oyundan 3 tur']])}
+    ` : ''}
+  </div>
+
+  <h2>${cfg.mixMode ? 'Karma Mod için oyun seç (2–4)' : 'Oyun seç (12 Mod)'}</h2>
+  ${gameCardsHTML(true)}
+
+  <div class="card">
+    <h2>Ortak Oyun ve Zorluk Ayarları</h2>
+    ${sel('difficulty', [['easy', '🟢 Zorluk: Kolay'], ['medium', '🟡 Zorluk: Orta'], ['hard', '🔴 Zorluk: Zor']])}
+    ${!cfg.mixMode && !MIX_FORBIDDEN.has(cfg.game) ? sel('mode', [['solo', 'Bireysel oyna'], ['team', 'Takımlı oyna']]) : ''}
+    ${!cfg.mixMode && cfg.mode === 'team' && cfg.game !== 'codenames' && !MIX_FORBIDDEN.has(cfg.game) ? sel('teams', [[2, '2 takım'], [3, '3 takım'], [4, '4 takım']]) : ''}
+    ${cfg.game === 'imposter' ? sel('imposterCount', [[1, 'Imposter sayısı: 1'], [2, 'Imposter sayısı: 2']]) : ''}
+    ${sel('rounds', [[3, '3 tur'], [5, '5 tur'], [8, '8 tur']])}
+    ${sel('time', [[10, 'Tur süresi: 10 sn'], [20, 'Tur süresi: 20 sn'], [30, 'Tur süresi: 30 sn']])}
+  </div>
+
+  ${mediaFiltersHTML()}
+
+  <button class="o" onclick="sock.emit('start',cfg)">OYUNU BAŞLAT</button>`;
+}
+
+function lobby(s) {
+  const host = s.host === s.me;
+  const mine = s.players.find(p => p.id === s.me) || { ready: false };
+  return `<div class="card">
+    <div class="mu">Oda kodu</div>
+    <div class="big">${s.code}</div>
+    <button class="x" onclick="copyLink(this)">Bağlantıyı kopyala</button>
+  </div>
+  <div class="card">
+    <h2>Oyuncular (${s.players.length}/10)</h2>
+    ${s.players.map(p => `<div class="pl">
+      <span class="av">${p.av}</span>
+      <b>${esc(p.name)}${p.id === s.host ? ' 👑' : ''}</b>
+      <span>${!p.on ? '📴' : p.ready || p.id === s.host ? '✅' : '⏳'}</span>
+      ${host && p.id !== s.me ? `<button class="x kick" onclick="sock.emit('kick','${p.id}')">✕</button>` : ''}
+    </div>`).join('')}
+  </div>
+  ${host ? setup() : `<button class="${mine.ready ? 'x' : 'g'}" onclick="sock.emit('ready')">${mine.ready ? 'Hazır değilim' : 'Hazırım'}</button><p class="mu">Oda sahibinin oyunu başlatması bekleniyor.</p>`}
+  <button class="x" onclick="leaveRoom()">Odadan ayrıl</button>`;
+}
+
+function board(s) {
+  const rows = s.mode === 'team' && s.teams && s.teams.length
+    ? s.teams.map((t, i) => ({ n: t.name, av: s.players.filter(p => p.team === i).map(p => p.av).join(''), c: t.color, sc: t.score }))
+    : s.players.map(p => ({ n: p.name, av: p.av, sc: p.score }));
+  return `<div class="card">
+    <h2>Genel puan durumu</h2>
+    ${rows.sort((a, b) => b.sc - a.sc).map(x => `<div class="pl">
+      <span class="av">${x.av}</span>
+      <b style="color:${x.c || 'inherit'}">${esc(x.n)}</b>
+      <b style="flex:none">${x.sc}</b>
+    </div>`).join('')}
+  </div>`;
+}
+
+function mixBanner(s) {
+  if (!s.mix || !s.mix.active) return '';
+  return `<div class="card" style="background:#231b46;border-color:var(--o)">
+    <div class="mu">🔀 KARMA MOD · Tur ${s.mix.completedRounds}/${s.mix.totalRounds}</div>
+    <div>Şu an: <b>${GE[s.mix.currentGame] || ''} ${esc(GN[s.mix.currentGame] || s.mix.currentGame)}</b> · Sıradaki: <b>${GE[s.mix.nextGame] || ''} ${esc(GN[s.mix.nextGame] || s.mix.nextGame)}</b></div>
+  </div>`;
+}
+
+function playCodenames(s) {
+  const cn = s.cn;
+  if (!cn) return '';
+  const mine = s.players.find(p => p.id === s.me);
+  const canGiveClue = cn.isSpymaster && mine && mine.team === cn.turnTeam && !cn.clue;
+  const canPick = !cn.isSpymaster && mine && mine.team === cn.turnTeam && cn.clue && cn.guessesLeft > 0;
+
+  return `${mixBanner(s)}
+  <div class="card pop">
+    <div class="row">
+      <div>🔴 Kırmızı Kalan: <b>${cn.redLeft}</b></div>
+      <div>🔵 Mavi Kalan: <b>${cn.blueLeft}</b></div>
+    </div>
+    <div style="margin-top:6px">Sıra: <b style="color:${cn.turnTeam === 0 ? '#f87171' : '#60a5fa'}">${cn.turnTeam === 0 ? 'Kırmızı Takım' : 'Mavi Takım'}</b> ${cn.isSpymaster ? '· 🕵️ Takım Liderisin (Gizli Harita Aktif)' : ''}</div>
+    ${cn.clue ? `<div class="card" style="background:#120d28">İpucu: <b>"${esc(cn.clue.word)}"</b> · Sayı: <b>${cn.clue.count}</b> (Kalan hak: ${cn.guessesLeft})</div>` : ''}
+    ${canGiveClue ? `
+      <div class="row">
+        <input id="cnWord" maxlength="24" placeholder="İpucu kelimesi">
+        <input id="cnCount" type="number" min="1" max="9" value="2" style="max-width:90px">
+      </div>
+      <button type="button" class="o" onclick="sock.emit('cn:clue',{word:$('cnWord').value,count:$('cnCount').value})">İPUCU VER</button>
+    ` : ''}
+    <div class="cn-grid">
+      ${cn.cards.map(c => {
+        const cls = ['cn-card'];
+        if (c.revealed) cls.push('rev');
+        if (c.type === 'red') cls.push('t-red');
+        else if (c.type === 'blue') cls.push('t-blue');
+        else if (c.type === 'neutral') cls.push('t-neutral');
+        else if (c.type === 'assassin') cls.push('t-assassin');
+        return `<button type="button" class="${cls.join(' ')}" ${!c.revealed && canPick ? `onclick="sock.emit('cn:pick',${c.idx})"` : 'disabled'}>${esc(c.word)}</button>`;
+      }).join('')}
+    </div>
+    ${mine && mine.team === cn.turnTeam ? `<button type="button" class="sm x" onclick="sock.emit('cn:end_turn')">Turu Devret</button>` : ''}
+    ${s.host === s.me ? `<button type="button" class="sm b" onclick="sock.emit('cn:swap_spy')">Takım Liderlerini Değiştir</button>` : ''}
+    <div class="mu" style="margin-top:8px">${(cn.log || []).map(l => `<div>• ${esc(l)}</div>`).join('')}</div>
+  </div>`;
+}
+
+function playWerewolf(s) {
+  const ww = s.ww;
+  if (!ww) return '';
+  const roleNames = {
+    werewolf: '🐺 Vampir (Gece bir oyuncuyu seç)',
+    doctor: '🩺 Doktor (Gece bir oyuncuyu koru)',
+    detective: '🔍 Dedektif (Gece bir oyuncunun rolünü araştır)',
+    villager: '🏡 Köylü (Gündüz tartış ve oyla)'
+  };
+  const aliveOthers = s.players.filter(p => p.alive && p.id !== s.me);
+
+  return `${mixBanner(s)}
+  <div class="card pop">
+    <div class="mu">Zorluk: ${esc(DIFF_TR[s.cfg.difficulty] || 'Orta')}</div>
+    <h2>${esc((s.q || {}).t)}</h2>
+    <div class="card" style="background:#120d28">Gizli Rolün: <b>${esc(roleNames[ww.myRole] || ww.myRole)}</b> · Durum: <b>${ww.alive ? 'Hayatta' : 'Oyun Dışı'}</b></div>
+    ${ww.detectiveResult ? `<div class="card toast">🔍 Araştırma Sonucu: <b>${esc(ww.detectiveResult)}</b></div>` : ''}
+    ${ww.lastNightSummary ? `<p class="mu">🌙 Son Gece: ${esc(ww.lastNightSummary)}</p>` : ''}
+    ${ww.lastVoteSummary ? `<p class="mu">🗳️ Son Oylama: ${esc(ww.lastVoteSummary)}</p>` : ''}
+
+    ${ww.subPhase === 'night' && ww.alive && ['werewolf', 'doctor', 'detective'].includes(ww.myRole) ? `
+      <h3>Gece Seçimini Yap</h3>
+      ${aliveOthers.map(p => `<button type="button" class="sm b" onclick="sock.emit('ww:night_action','${p.id}')">${p.av} ${esc(p.name)}</button>`).join('')}
+    ` : ''}
+
+    ${ww.subPhase === 'day_vote' && ww.alive ? `
+      <h3>Gündüz Oylaması (${ww.votedCount} oy verildi)</h3>
+      ${aliveOthers.map(p => `<button type="button" class="sm ${ww.myVote === p.id ? 'o' : 'x'}" onclick="sock.emit('ww:vote','${p.id}')">${p.av} ${esc(p.name)} ${ww.myVote === p.id ? '✓' : ''}</button>`).join('')}
+    ` : ''}
+
+    <div class="mu" style="margin-top:10px"><b>Oyun Geçmişi:</b>${(ww.history || []).map(h => `<div>• ${esc(h)}</div>`).join('')}</div>
+  </div>`;
+}
+
+function playImposter(s) {
+  const imp = s.imp;
+  if (!imp) return '';
+  const alreadyClued = (imp.clues || []).some(c => c.pid === s.me);
+
+  return `${mixBanner(s)}
+  <div class="card pop">
+    <div class="mu">Kategori: <b>${esc(imp.category)}</b> · Zorluk: ${esc(DIFF_TR[s.cfg.difficulty] || 'Orta')}</div>
+    <div class="card" style="background:#120d28">
+      <div class="mu">Senin Gizli Kelimen</div>
+      <div class="big" style="font-size:34px">${esc(imp.myWord)}</div>
+    </div>
+    ${imp.subPhase === 'clues' ? `
+      ${!alreadyClued ? `
+        <input id="impClueInp" maxlength="60" placeholder="Kelimenle ilgili kısa ipucu yaz...">
+        <button type="button" class="o" onclick="sock.emit('imp:clue',$('impClueInp').value)">İPUCU GÖNDER</button>
+      ` : `<div class="mu">✅ İpucunu gönderdin.</div>`}
+    ` : ''}
+    <div class="card" style="background:#120d28">
+      <b>Verilen İpuçları (${(imp.clues || []).length})</b>
+      ${(imp.clues || []).map(c => `<div class="pl"><span class="av">${c.av}</span><b>${esc(c.name)}</b><span>${esc(c.text)}</span></div>`).join('') || '<div class="mu">Henüz ipucu yok.</div>'}
+    </div>
+    ${imp.subPhase === 'vote' ? `
+      <h3>Imposter Kim? Oy Ver (${imp.votedCount}/${s.players.length})</h3>
+      ${s.players.filter(p => p.id !== s.me).map(p => `<button type="button" class="sm ${imp.myVote === p.id ? 'o' : 'b'}" onclick="sock.emit('imp:vote','${p.id}')">${p.av} ${esc(p.name)} ${imp.myVote === p.id ? '✓' : ''}</button>`).join('')}
+    ` : ''}
+    ${imp.subPhase === 'guess_common' && imp.isImposter ? `
+      <div class="card" style="border-color:var(--o)">
+        <h3>Yakalandın! Son Şans: Ortak Kelimeyi Bil</h3>
+        <input id="impGuessInp" placeholder="Ortak kelime tahmini...">
+        <button type="button" class="o" onclick="sock.emit('imp:guess',$('impGuessInp').value)">SON TAHMİNİ GÖNDER</button>
+      </div>
+    ` : ''}
+  </div>`;
+}
+
+function play(s) {
+  if (s.game === 'codenames') return playCodenames(s) + board(s) + (s.host === s.me ? `<button class="x" onclick="sock.emit('stop')">Oyunu bitir</button>` : '');
+  if (s.game === 'werewolf') return playWerewolf(s) + board(s) + (s.host === s.me ? `<button class="x" onclick="sock.emit('stop')">Oyunu bitir</button>` : '');
+  if (s.game === 'imposter') return playImposter(s) + board(s) + (s.host === s.me ? `<button class="x" onclick="sock.emit('stop')">Oyunu bitir</button>` : '');
+
+  const q = s.q || { t: '', o: [] };
+  const rev = s.phase === 'reveal';
+  const mine = s.players.find(p => p.id === s.me) || {};
+  const kind = K[s.game] || 'opt';
+  const tm = s.mode === 'team' && mine.team != null && s.teams[mine.team] ? s.teams[mine.team] : null;
+
+  let h = mixBanner(s);
+  h += `<div class="mu">Tur ${s.round}/${s.cfg.rounds} · ${GE[s.game] || ''} ${GN[s.game] || s.game} · ${DIFF_TR[s.cfg.difficulty] || 'Orta'}${q.c ? ' · ' + esc(q.c) : ''}${tm ? ` · <b style="color:${tm.color}">${tm.name} takımı</b>` : ''}</div>`;
+  h += `<div class="card pop"><h2 ${kind === 'txt' && s.game === 'emoji' ? 'style="font-size:42px;text-align:center"' : ''}>${esc(q.t)}</h2>`;
+
+  if (s.game === 'song') h += songUI(q);
+  if (s.game === 'film') h += filmUI(q);
+  h += `</div>`;
+
+  if (!rev) {
+    h += `<div class="bar" id="bar"></div><p class="mu" id="t"></p>`;
+    if (s.mine) {
+      h += `<div class="card">✅ Cevabın alındı. Diğerleri bekleniyor.</div>`;
+    } else if (kind === 'opt') {
+      const C = (q.o || []).length === 2 ? ['g', 'o'] : ['', 'b', 'o', 'g'];
+      h += (q.o || []).map((t, i) => `<button class="${C[i % C.length]}" onclick="sock.emit('answer',${i})">${esc(t)}</button>`).join('');
+    } else {
+      const pen = q.penaltyLeft || 0;
+      h += `<input id="ans" ${kind === 'num' ? 'inputmode="decimal"' : 'maxlength="50" autocomplete="off"'} placeholder="${kind === 'num' ? 'Tahminin' + (q.u ? ' (' + esc(q.u) + ')' : '') : 'Cevabın'}">
+      <button class="o" ${pen > 0 ? 'disabled' : ''} onclick="sendAns()">${pen > 0 ? 'BEKLEME CEZASI...' : 'GÖNDER'}</button>`;
+    }
+    h += `<p class="mu">${s.players.filter(p => p.done).length} cevap geldi</p>`;
+  } else {
+    const r = s.rev || { rows: [] };
+    const fmt = v => kind === 'num' && typeof v === 'number' ? v.toLocaleString('tr-TR') : kind === 'txt' ? String(v) : (q.o && q.o[v] != null ? q.o[v] : String(v));
+    const tot = r.cnt ? r.cnt.reduce((a, b) => a + b, 0) || 1 : 1;
+    const pc = i => Math.round(100 * r.cnt[i] / tot);
+    if (r.v != null) {
+      h += `<div class="card pop"><div class="mu">Doğru cevap</div><div class="big" style="font-size:${kind === 'opt' ? 24 : 30}px">${esc(fmt(r.v))} ${esc(q.u || '')}</div></div>`;
+    }
+    if (r.cnt && q.o) {
+      h += `<div class="card">${q.o.map((t, i) => `<div class="dist ${r.v === i ? 'ok' : ''}"><i style="width:${pc(i)}%"></i><span>${esc(t)}</span><b>${pc(i)}%</b></div>`).join('')}</div>`;
+    }
+    if (r.x) h += `<div class="card">💡 ${esc(r.x)}</div>`;
+    h += `<div class="card">${(r.rows || []).map(x => `<div class="pl"><span class="av">${x.av}</span><b style="color:${x.c || 'inherit'}">${esc(x.n)}</b>${kind === 'opt' ? '' : `<span class="mu">${esc(fmt(x.v))}</span>`}<b style="flex:none">+${x.pts}</b></div>`).join('') || '<p class="mu">Kimse cevaplamadı.</p>'}</div>`;
+  }
+
+  return h + board(s) + (s.host === s.me ? `<button class="x" onclick="sock.emit('stop')">Oyunu bitir</button>` : '');
+}
+
+function end(s) {
+  const rows = (s.mode === 'team' && s.teams && s.teams.length
+    ? s.teams.map(t => ({ n: t.name, sc: t.score }))
+    : s.players.map(p => ({ n: p.name, sc: p.score }))).sort((a, b) => b.sc - a.sc);
+  const w = rows.length ? rows.filter(x => x.sc === rows[0].sc) : [];
+  const night = [...s.players].sort((a, b) => b.night - a.night);
+  return `<div class="card pop">
+    <div class="big">🏆</div>
+    <h1 style="text-align:center">${w.length > 1 ? 'Beraberlik!' : (w[0] ? esc(w[0].n) + ' kazandı!' : 'Oyun Bitti!')}</h1>
+  </div>
+  ${board(s)}
+  <div class="card">
+    <h2>🌙 Gecenin genel puan tablosu</h2>
+    ${night.map((p, i) => `<div class="pl"><span>${['🥇', '🥈', '🥉'][i] || (i + 1)}</span><span class="av">${p.av}</span><b>${esc(p.name)}</b><b style="flex:none">${p.night}</b></div>`).join('')}
+  </div>
+  ${s.host === s.me ? `<button class="o" onclick="sock.emit('stop')">Yeni oyun seç</button><button class="x" onclick="sock.emit('reset')">Gece puanlarını sıfırla</button>` : '<p class="mu">Oda sahibi yeni oyunu seçecek.</p>'}`;
+}
+
+let lastHtml = '', lastKey = '';
+
+function tick() {
+  songSync();
+  if (!S || S.phase !== 'question' || document.hidden) return;
+  if ($('nf')) { const nx = S.q && S.q.nextAt ? Math.ceil((S.q.nextAt - (Date.now() + skew)) / 1000) : 0; $('nf').textContent = nx > 0 ? 'Sıradaki kare: ' + nx + ' sn' : 'Son kare'; }
+  const l = Math.max(0, S.left - (Date.now() - at));
+  if ($('t')) $('t').textContent = Math.ceil(l / 1000) + ' sn';
+  if ($('bar') && S.cfg && S.cfg.time) {
+    $('bar').style.width = Math.min(100, (100 * l / (S.cfg.time * 1000))) + '%';
+  }
+}
+
+function draw() {
+  const app = $('app');
+  const keep = {};
+  app.querySelectorAll('input[id],select[id],textarea[id]').forEach(el => { keep[el.id] = el.value; });
+  const ae = document.activeElement;
+  const f = ae && ae.id && app.contains(ae) ? ae.id : '';
+  const sel = f && ae.selectionStart != null ? [ae.selectionStart, ae.selectionEnd] : null;
+  const y = window.scrollY;
+
+  let html;
+  try {
+    html =
+      (msg ? `<div class="card msg">${esc(msg)}</div>` : '') +
+      (toast ? `<div class="card toast">${esc(toast)}</div>` : '') +
+      (!S ? home() : S.phase === 'lobby' ? lobby(S) : S.phase === 'end' ? end(S) : play(S));
+  } catch (e) {
+    console.error(e);
+    html = '<div class="card msg">Ekran çizilirken bir hata oluştu. Sayfayı yenilemeyi dene.</div>';
+  }
+
+  const key = S ? [S.phase, S.round, S.game].join('|') : 'home';
+  const same = key === lastKey;
+  lastKey = key;
+  if (html === lastHtml) { tick(); return; }
+  lastHtml = html;
+
+  app.innerHTML = html;
+  app.classList.toggle('nopop', same);
+  if (!same) for (const id of ['ans', 'cnWord', 'impClueInp', 'impGuessInp']) delete keep[id];
+  for (const id in keep) {
+    const el = $(id);
+    if (el && document.activeElement !== el) el.value = keep[id];
+  }
+  if (f && $(f)) {
+    $(f).focus({ preventScroll: true });
+    if (sel) { try { $(f).setSelectionRange(sel[0], sel[1]); } catch (e) {} }
+  }
+  if (same) window.scrollTo(0, y);
+  tick();
+}
+
+setInterval(tick, 250);
+
+draw();
+</script>
+</body>
+</html>
