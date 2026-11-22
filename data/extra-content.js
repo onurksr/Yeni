@@ -83,7 +83,7 @@ Frozen|Karlar Ülkesi|2013|hollywood|Hollywood,Disney,Animasyon,Fantastik||Froze
 Shrek|Shrek|2001|hollywood|Hollywood,Animasyon,Komedi,Fantastik||
 Recep İvedik|Recep İvedik|2008|tr|Türk Sineması,Komedi||
 Hababam Sınıfı|Hababam Sınıfı|1975|tr|Türk Sineması,Komedi,Eski Klasikler||
-E�kıya|Eşkıya|1996|tr|Türk Sineması,Dram,Suç ve Polisiye,Eski Klasikler||
+E�kıya|Eşkıya|1996|tr|Türk Sineması,Dram,Suç ve Polisiye,Eski Klasikler||
 G.O.R.A.|G.O.R.A.|2004|tr|Türk Sineması,Komedi,Bilim Kurgu||
 Babam ve Oğlum|Babam ve Oğlum|2005|tr|Türk Sineması,Dram||
 `.trim().split('\n').map((l, i) => {
